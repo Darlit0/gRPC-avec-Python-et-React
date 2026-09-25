@@ -1,6 +1,10 @@
 import grpc
 from concurrent import futures
+from collections import deque
 import logging
+import queue
+import threading
+import time
 
 from grpc_health.v1 import health, health_pb2, health_pb2_grpc
 from generated import user_pb2, user_pb2_grpc
@@ -29,7 +33,42 @@ class LoggingInterceptor(grpc.ServerInterceptor):
         return continuation(handler_call_details)
 
 
+class ChatHub:
+    """Diffuse chaque message à tous les abonnés (un thread par abonné)."""
+
+    def __init__(self, history_size=50):
+        self._lock = threading.Lock()
+        self._subscribers = set()
+        self._history = deque(maxlen=history_size)
+
+    def publish(self, message):
+        with self._lock:
+            self._history.append(message)
+            for subscriber in self._subscribers:
+                subscriber.put(message)
+            return len(self._subscribers)
+
+    def subscribe(self, context):
+        inbox = queue.Queue()
+        with self._lock:
+            self._subscribers.add(inbox)
+            history = list(self._history)
+        try:
+            yield from history
+            while context.is_active():
+                try:
+                    yield inbox.get(timeout=1)
+                except queue.Empty:
+                    continue
+        finally:
+            with self._lock:
+                self._subscribers.discard(inbox)
+
+
 class UserService(user_pb2_grpc.UserServiceServicer):
+    def __init__(self):
+        self.chat_hub = ChatHub()
+
     def GetUser(self, request, context):
         user = FAKE_DB.get(request.user_id)
         if user is None:
@@ -53,11 +92,29 @@ class UserService(user_pb2_grpc.UserServiceServicer):
         for message in request_iterator:
             yield user_pb2.ChatMessage(text=f"echo: {message.text}")
 
+    def SubscribeChat(self, request, context):
+        # Envoie les headers tout de suite : le client sait qu'il est connecté même sans message
+        context.send_initial_metadata(())
+        yield from self.chat_hub.subscribe(context)
+
+    def SendChatMessage(self, request, context):
+        text = request.text.strip()
+        author = request.author.strip()
+        if not text:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, "Message text is required")
+        if len(text) > 500:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, "Message too long (max 500)")
+        if not author:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, "Message author is required")
+        message = user_pb2.ChatMessage(text=text, author=author, sent_at_ms=int(time.time() * 1000))
+        return user_pb2.SendChatMessageResponse(subscriber_count=self.chat_hub.publish(message))
+
 
 def serve():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     server = grpc.server(
-        futures.ThreadPoolExecutor(max_workers=10),
+        # Chaque abonné au chat occupe un thread tant que son flux est ouvert
+        futures.ThreadPoolExecutor(max_workers=50),
         interceptors=[LoggingInterceptor()],
     )
     user_pb2_grpc.add_UserServiceServicer_to_server(UserService(), server)
