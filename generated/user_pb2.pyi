@@ -50,7 +50,21 @@ class CreateUsersResponse(_message.Message):
     def __init__(self, created_count: _Optional[int] = ...) -> None: ...
 
 class ChatMessage(_message.Message):
-    __slots__ = ("text",)
+    __slots__ = ("text", "author", "sent_at_ms")
     TEXT_FIELD_NUMBER: _ClassVar[int]
+    AUTHOR_FIELD_NUMBER: _ClassVar[int]
+    SENT_AT_MS_FIELD_NUMBER: _ClassVar[int]
     text: str
-    def __init__(self, text: _Optional[str] = ...) -> None: ...
+    author: str
+    sent_at_ms: int
+    def __init__(self, text: _Optional[str] = ..., author: _Optional[str] = ..., sent_at_ms: _Optional[int] = ...) -> None: ...
+
+class SubscribeChatRequest(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
+class SendChatMessageResponse(_message.Message):
+    __slots__ = ("subscriber_count",)
+    SUBSCRIBER_COUNT_FIELD_NUMBER: _ClassVar[int]
+    subscriber_count: int
+    def __init__(self, subscriber_count: _Optional[int] = ...) -> None: ...

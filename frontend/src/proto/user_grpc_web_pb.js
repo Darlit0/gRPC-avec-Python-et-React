@@ -192,5 +192,122 @@ proto.user.v1.UserServicePromiseClient.prototype.listUsers =
 };
 
 
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.user.v1.SubscribeChatRequest,
+ *   !proto.user.v1.ChatMessage>}
+ */
+const methodDescriptor_UserService_SubscribeChat = new grpc.web.MethodDescriptor(
+  '/user.v1.UserService/SubscribeChat',
+  grpc.web.MethodType.SERVER_STREAMING,
+  proto.user.v1.SubscribeChatRequest,
+  proto.user.v1.ChatMessage,
+  /**
+   * @param {!proto.user.v1.SubscribeChatRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.user.v1.ChatMessage.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.user.v1.SubscribeChatRequest} request The request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!grpc.web.ClientReadableStream<!proto.user.v1.ChatMessage>}
+ *     The XHR Node Readable Stream
+ */
+proto.user.v1.UserServiceClient.prototype.subscribeChat =
+    function(request, metadata) {
+  return this.client_.serverStreaming(this.hostname_ +
+      '/user.v1.UserService/SubscribeChat',
+      request,
+      metadata || {},
+      methodDescriptor_UserService_SubscribeChat);
+};
+
+
+/**
+ * @param {!proto.user.v1.SubscribeChatRequest} request The request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!grpc.web.ClientReadableStream<!proto.user.v1.ChatMessage>}
+ *     The XHR Node Readable Stream
+ */
+proto.user.v1.UserServicePromiseClient.prototype.subscribeChat =
+    function(request, metadata) {
+  return this.client_.serverStreaming(this.hostname_ +
+      '/user.v1.UserService/SubscribeChat',
+      request,
+      metadata || {},
+      methodDescriptor_UserService_SubscribeChat);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.user.v1.ChatMessage,
+ *   !proto.user.v1.SendChatMessageResponse>}
+ */
+const methodDescriptor_UserService_SendChatMessage = new grpc.web.MethodDescriptor(
+  '/user.v1.UserService/SendChatMessage',
+  grpc.web.MethodType.UNARY,
+  proto.user.v1.ChatMessage,
+  proto.user.v1.SendChatMessageResponse,
+  /**
+   * @param {!proto.user.v1.ChatMessage} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.user.v1.SendChatMessageResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.user.v1.ChatMessage} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.user.v1.SendChatMessageResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.user.v1.SendChatMessageResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.user.v1.UserServiceClient.prototype.sendChatMessage =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/user.v1.UserService/SendChatMessage',
+      request,
+      metadata || {},
+      methodDescriptor_UserService_SendChatMessage,
+      callback);
+};
+
+
+/**
+ * @param {!proto.user.v1.ChatMessage} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.user.v1.SendChatMessageResponse>}
+ *     Promise that resolves to the response
+ */
+proto.user.v1.UserServicePromiseClient.prototype.sendChatMessage =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/user.v1.UserService/SendChatMessage',
+      request,
+      metadata || {},
+      methodDescriptor_UserService_SendChatMessage);
+};
+
+
 module.exports = proto.user.v1;
 

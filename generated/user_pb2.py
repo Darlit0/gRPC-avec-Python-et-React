@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nuser.proto\x12\x07user.v1\"!\n\x0eGetUserRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\"\x12\n\x10ListUsersRequest\"\'\n\x07\x41\x64\x64ress\x12\x0e\n\x06street\x18\x01 \x01(\t\x12\x0c\n\x04\x63ity\x18\x02 \x01(\t\"d\n\x04User\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\r\n\x05\x65mail\x18\x03 \x01(\t\x12\x10\n\x08nickname\x18\x04 \x01(\t\x12!\n\x07\x61\x64\x64ress\x18\x05 \x01(\x0b\x32\x10.user.v1.Address\".\n\x0fGetUserResponse\x12\x1b\n\x04user\x18\x01 \x01(\x0b\x32\r.user.v1.User\",\n\x13\x43reateUsersResponse\x12\x15\n\rcreated_count\x18\x01 \x01(\x05\"\x1b\n\x0b\x43hatMessage\x12\x0c\n\x04text\x18\x01 \x01(\t2\xfa\x01\n\x0bUserService\x12<\n\x07GetUser\x12\x17.user.v1.GetUserRequest\x1a\x18.user.v1.GetUserResponse\x12\x37\n\tListUsers\x12\x19.user.v1.ListUsersRequest\x1a\r.user.v1.User0\x01\x12<\n\x0b\x43reateUsers\x12\r.user.v1.User\x1a\x1c.user.v1.CreateUsersResponse(\x01\x12\x36\n\x04\x43hat\x12\x14.user.v1.ChatMessage\x1a\x14.user.v1.ChatMessage(\x01\x30\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nuser.proto\x12\x07user.v1\"!\n\x0eGetUserRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\"\x12\n\x10ListUsersRequest\"\'\n\x07\x41\x64\x64ress\x12\x0e\n\x06street\x18\x01 \x01(\t\x12\x0c\n\x04\x63ity\x18\x02 \x01(\t\"d\n\x04User\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\r\n\x05\x65mail\x18\x03 \x01(\t\x12\x10\n\x08nickname\x18\x04 \x01(\t\x12!\n\x07\x61\x64\x64ress\x18\x05 \x01(\x0b\x32\x10.user.v1.Address\".\n\x0fGetUserResponse\x12\x1b\n\x04user\x18\x01 \x01(\x0b\x32\r.user.v1.User\",\n\x13\x43reateUsersResponse\x12\x15\n\rcreated_count\x18\x01 \x01(\x05\"?\n\x0b\x43hatMessage\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x0e\n\x06\x61uthor\x18\x02 \x01(\t\x12\x12\n\nsent_at_ms\x18\x03 \x01(\x03\"\x16\n\x14SubscribeChatRequest\"3\n\x17SendChatMessageResponse\x12\x18\n\x10subscriber_count\x18\x01 \x01(\x05\x32\x8d\x03\n\x0bUserService\x12<\n\x07GetUser\x12\x17.user.v1.GetUserRequest\x1a\x18.user.v1.GetUserResponse\x12\x37\n\tListUsers\x12\x19.user.v1.ListUsersRequest\x1a\r.user.v1.User0\x01\x12<\n\x0b\x43reateUsers\x12\r.user.v1.User\x1a\x1c.user.v1.CreateUsersResponse(\x01\x12\x36\n\x04\x43hat\x12\x14.user.v1.ChatMessage\x1a\x14.user.v1.ChatMessage(\x01\x30\x01\x12\x46\n\rSubscribeChat\x12\x1d.user.v1.SubscribeChatRequest\x1a\x14.user.v1.ChatMessage0\x01\x12I\n\x0fSendChatMessage\x12\x14.user.v1.ChatMessage\x1a .user.v1.SendChatMessageResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -44,7 +44,11 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_CREATEUSERSRESPONSE']._serialized_start=269
   _globals['_CREATEUSERSRESPONSE']._serialized_end=313
   _globals['_CHATMESSAGE']._serialized_start=315
-  _globals['_CHATMESSAGE']._serialized_end=342
-  _globals['_USERSERVICE']._serialized_start=345
-  _globals['_USERSERVICE']._serialized_end=595
+  _globals['_CHATMESSAGE']._serialized_end=378
+  _globals['_SUBSCRIBECHATREQUEST']._serialized_start=380
+  _globals['_SUBSCRIBECHATREQUEST']._serialized_end=402
+  _globals['_SENDCHATMESSAGERESPONSE']._serialized_start=404
+  _globals['_SENDCHATMESSAGERESPONSE']._serialized_end=455
+  _globals['_USERSERVICE']._serialized_start=458
+  _globals['_USERSERVICE']._serialized_end=855
 # @@protoc_insertion_point(module_scope)

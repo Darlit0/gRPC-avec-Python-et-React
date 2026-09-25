@@ -31,6 +31,15 @@ message CreateUsersResponse {
 
 message ChatMessage {
   string text = 1;
+  string author = 2;
+  int64 sent_at_ms = 3;
+}
+
+message SubscribeChatRequest {
+}
+
+message SendChatMessageResponse {
+  int32 subscriber_count = 1;
 }
 
 service UserService {
@@ -38,4 +47,8 @@ service UserService {
   rpc ListUsers (ListUsersRequest) returns (stream User);
   rpc CreateUsers (stream User) returns (CreateUsersResponse);
   rpc Chat (stream ChatMessage) returns (stream ChatMessage);
+
+  // Module 4 : chat temps réel compatible gRPC-Web (pas de bidi dans le navigateur)
+  rpc SubscribeChat (SubscribeChatRequest) returns (stream ChatMessage);
+  rpc SendChatMessage (ChatMessage) returns (SendChatMessageResponse);
 }

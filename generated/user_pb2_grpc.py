@@ -54,6 +54,16 @@ class UserServiceStub:
                 request_serializer=user__pb2.ChatMessage.SerializeToString,
                 response_deserializer=user__pb2.ChatMessage.FromString,
                 _registered_method=True)
+        self.SubscribeChat = channel.unary_stream(
+                '/user.v1.UserService/SubscribeChat',
+                request_serializer=user__pb2.SubscribeChatRequest.SerializeToString,
+                response_deserializer=user__pb2.ChatMessage.FromString,
+                _registered_method=True)
+        self.SendChatMessage = channel.unary_unary(
+                '/user.v1.UserService/SendChatMessage',
+                request_serializer=user__pb2.ChatMessage.SerializeToString,
+                response_deserializer=user__pb2.SendChatMessageResponse.FromString,
+                _registered_method=True)
 
 
 class UserServiceServicer:
@@ -83,6 +93,19 @@ class UserServiceServicer:
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SubscribeChat(self, request, context):
+        """Module 4 : chat temps réel compatible gRPC-Web (pas de bidi dans le navigateur)
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SendChatMessage(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_UserServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -105,6 +128,16 @@ def add_UserServiceServicer_to_server(servicer, server):
                     servicer.Chat,
                     request_deserializer=user__pb2.ChatMessage.FromString,
                     response_serializer=user__pb2.ChatMessage.SerializeToString,
+            ),
+            'SubscribeChat': grpc.unary_stream_rpc_method_handler(
+                    servicer.SubscribeChat,
+                    request_deserializer=user__pb2.SubscribeChatRequest.FromString,
+                    response_serializer=user__pb2.ChatMessage.SerializeToString,
+            ),
+            'SendChatMessage': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendChatMessage,
+                    request_deserializer=user__pb2.ChatMessage.FromString,
+                    response_serializer=user__pb2.SendChatMessageResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -215,6 +248,60 @@ class UserService:
             '/user.v1.UserService/Chat',
             user__pb2.ChatMessage.SerializeToString,
             user__pb2.ChatMessage.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SubscribeChat(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/user.v1.UserService/SubscribeChat',
+            user__pb2.SubscribeChatRequest.SerializeToString,
+            user__pb2.ChatMessage.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SendChatMessage(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/user.v1.UserService/SendChatMessage',
+            user__pb2.ChatMessage.SerializeToString,
+            user__pb2.SendChatMessageResponse.FromString,
             options,
             channel_credentials,
             insecure,
