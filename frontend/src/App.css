@@ -82,7 +82,6 @@ h1 { max-width: 680px; margin: 10px 0 12px; color: #0f172a; font-size: clamp(2.3
 .chat-text { color: #1e293b; font-size: 0.85rem; overflow-wrap: anywhere; }
 .chat-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .chat-input { flex: 1 1 180px; min-width: 0; height: 32px; padding: 0 10px; border: 1px solid #e2e8f0; border-radius: 8px; background: white; font-size: 0.85rem; }
-.chat-author { flex: 0 1 140px; }
 .chat-input:focus { outline: 2px solid #c7d2fe; border-color: #818cf8; }
 .chat-error { width: 100%; margin: 0; color: #b91c1c; font-size: 0.78rem; }
 .chat-hint { width: 100%; margin: 0; color: #94a3b8; font-size: 0.72rem; }

@@ -6,6 +6,9 @@ export const proto = userServiceModule
 export const endpointLabel = grpcEndpoint.replace(/^https?:\/\//, '')
 export const client = new userServiceModule.UserServiceClient(grpcEndpoint, null, null)
 
+// Salon de chat : Envoy l'utilise pour router toutes les requêtes du chat vers la même réplique
+export const CHAT_ROOM = 'general'
+
 // Codes gRPC utiles côté UI (https://grpc.io/docs/guides/status-codes/)
 export const StatusCode = {
   CANCELLED: 1,
@@ -16,9 +19,11 @@ export const StatusCode = {
   UNAVAILABLE: 14,
 }
 
-export function buildMetadata({ timeoutMs } = {}) {
+export function buildMetadata({ timeoutMs, token, chatRoom } = {}) {
   const metadata = { 'client-id': 'react-web' }
   if (timeoutMs) metadata['grpc-timeout'] = `${timeoutMs}m`
+  if (token) metadata.authorization = `Bearer ${token}`
+  if (chatRoom) metadata['x-chat-room'] = chatRoom
   return metadata
 }
 

@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
-import { buildMetadata, client, describeGrpcError, proto, StatusCode } from './grpcClient.js'
+import { buildMetadata, CHAT_ROOM, client, describeGrpcError, proto, StatusCode } from './grpcClient.js'
 
 const MAX_RECONNECT_DELAY_MS = 10000
 
 // Server streaming SubscribeChat (réception) + unary SendChatMessage (envoi) :
 // gRPC-Web ne supporte pas le streaming bidirectionnel dans le navigateur.
-export function useChat() {
+export function useChat(session, onUnauthenticated) {
   const [messages, setMessages] = useState([])
   const [connected, setConnected] = useState(false)
   const [error, setError] = useState('')
@@ -20,7 +20,7 @@ export function useChat() {
     const connect = () => {
       retryTimer = null
       setMessages([]) // le serveur renvoie l'historique à chaque abonnement
-      stream = client.subscribeChat(new proto.SubscribeChatRequest(), buildMetadata())
+      stream = client.subscribeChat(new proto.SubscribeChatRequest(), buildMetadata({ chatRoom: CHAT_ROOM }))
       stream.on('metadata', () => {
         attempt = 0
         setConnected(true)
@@ -56,14 +56,14 @@ export function useChat() {
     }
   }, [])
 
-  const send = useCallback((author, text) => {
+  const send = useCallback((text) => {
+    if (!session) return
     const request = new proto.ChatMessage()
-    request.setAuthor(author)
     request.setText(text)
     setSending(true)
     client.sendChatMessage(
       request,
-      buildMetadata({ timeoutMs: 2000 }),
+      buildMetadata({ timeoutMs: 2000, token: session.token, chatRoom: CHAT_ROOM }),
       (err) => {
         setSending(false)
         if (!err) {
@@ -71,9 +71,10 @@ export function useChat() {
           return
         }
         setError(describeGrpcError(err))
+        if (err.code === StatusCode.UNAUTHENTICATED) onUnauthenticated()
       },
     )
-  }, [])
+  }, [session, onUnauthenticated])
 
   return { messages, connected, error, sending, send }
 }

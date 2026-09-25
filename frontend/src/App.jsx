@@ -1,5 +1,6 @@
 import { Activity, ArrowUpRight, Database, Radio, Server, Wifi } from 'lucide-react'
 import { useUserGrpc } from './useUserGrpc.js'
+import { endpointLabel } from './grpcClient.js'
 import { ChatPanel } from './components/ChatPanel.jsx'
 import { Badge } from './components/ui/badge.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card.jsx'
@@ -17,7 +18,7 @@ function UserMetric({ label, value, detail }) {
 }
 
 function App() {
-  const { user, users, error, loading, streaming } = useUserGrpc()
+  const { user, users, serverInfo, error, loading, streaming } = useUserGrpc()
   const connectionState = error ? 'Erreur réseau' : loading ? 'Connexion…' : 'Connecté'
 
   return (
@@ -34,7 +35,7 @@ function App() {
 
         <section className="hero">
           <div><p className="eyebrow">Service overview / user.v1</p><h1>Les données, en mouvement.</h1><p className="hero-copy">Une vue directe sur votre service Python gRPC et son flux de données en temps réel.</p></div>
-          <div className="hero-signal"><Wifi size={18} /><span>localhost:8080</span></div>
+          <div className="hero-signal"><Wifi size={18} /><span>{endpointLabel}</span></div>
         </section>
 
         {error && <div className="alert-error">Erreur de communication : {error}</div>}
@@ -42,7 +43,7 @@ function App() {
         <div className="metric-grid">
           <Card className="metric-card"><CardContent><UserMetric label="Utilisateurs reçus" value={users.length} detail={streaming ? 'Flux actif maintenant' : 'Flux terminé'} /></CardContent></Card>
           <Card className="metric-card"><CardContent><UserMetric label="RPC principal" value="GetUser" detail="Unary · 2000 ms" /></CardContent></Card>
-          <Card className="metric-card"><CardContent><UserMetric label="Transport" value="gRPC-Web" detail="Via Envoy proxy" /></CardContent></Card>
+          <Card className="metric-card"><CardContent><UserMetric label="Instance backend" value={serverInfo?.hostname ?? '—'} detail={serverInfo ? `Via Envoy · ${serverInfo.tlsEnabled ? 'TLS' : 'sans TLS'}` : 'gRPC-Web via Envoy'} /></CardContent></Card>
         </div>
 
         <div className="content-grid">

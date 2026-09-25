@@ -4,6 +4,7 @@ import { buildMetadata, client, describeGrpcError, proto, StatusCode } from './g
 export function useUserGrpc(userId = 1) {
   const [user, setUser] = useState(null)
   const [users, setUsers] = useState([])
+  const [serverInfo, setServerInfo] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [streaming, setStreaming] = useState(true)
@@ -20,6 +21,11 @@ export function useUserGrpc(userId = 1) {
         setUser(response?.getUser?.())
       }
       setLoading(false)
+    })
+
+    // Avec plusieurs répliques, chaque rechargement peut tomber sur une instance différente
+    client.getServerInfo(new proto.ServerInfoRequest(), metadata, (err, response) => {
+      if (!err) setServerInfo({ hostname: response.getHostname(), tlsEnabled: response.getTlsEnabled() })
     })
 
     // Liste locale à cet abonnement : pas de doublons si l'effet est relancé (StrictMode)
@@ -40,5 +46,5 @@ export function useUserGrpc(userId = 1) {
     return () => stream.cancel()
   }, [userId])
 
-  return { user, users, error, loading, streaming }
+  return { user, users, serverInfo, error, loading, streaming }
 }
