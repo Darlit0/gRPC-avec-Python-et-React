@@ -1,0 +1,5 @@
+# Certificats générés localement (clés privées)
+certs/
+
+.venv/
+__pycache__/

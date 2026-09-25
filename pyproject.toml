@@ -1,0 +1,15 @@
+[project]
+name = "grpc-python-react"
+version = "0.1.0"
+description = "gRPC Python backend for the React gRPC-Web course project"
+requires-python = ">=3.13"
+dependencies = [
+    "grpcio==1.84.0",
+    "grpcio-tools==1.84.0",
+]
+
+[dependency-groups]
+dev = []
+
+[tool.uv]
+package = false
