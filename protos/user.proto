@@ -42,6 +42,24 @@ message SendChatMessageResponse {
   int32 subscriber_count = 1;
 }
 
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string token = 1;
+  int64 expires_at_ms = 2;
+}
+
+message ServerInfoRequest {
+}
+
+message ServerInfo {
+  string hostname = 1;
+  bool tls_enabled = 2;
+}
+
 service UserService {
   rpc GetUser (GetUserRequest) returns (GetUserResponse);
   rpc ListUsers (ListUsersRequest) returns (stream User);
@@ -51,4 +69,8 @@ service UserService {
   // Module 4 : chat temps réel compatible gRPC-Web (pas de bidi dans le navigateur)
   rpc SubscribeChat (SubscribeChatRequest) returns (stream ChatMessage);
   rpc SendChatMessage (ChatMessage) returns (SendChatMessageResponse);
+
+  // Module 5 : authentification JWT et instance qui a répondu (load balancing)
+  rpc Login (LoginRequest) returns (LoginResponse);
+  rpc GetServerInfo (ServerInfoRequest) returns (ServerInfo);
 }

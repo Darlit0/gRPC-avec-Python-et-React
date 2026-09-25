@@ -64,6 +64,16 @@ class UserServiceStub:
                 request_serializer=user__pb2.ChatMessage.SerializeToString,
                 response_deserializer=user__pb2.SendChatMessageResponse.FromString,
                 _registered_method=True)
+        self.Login = channel.unary_unary(
+                '/user.v1.UserService/Login',
+                request_serializer=user__pb2.LoginRequest.SerializeToString,
+                response_deserializer=user__pb2.LoginResponse.FromString,
+                _registered_method=True)
+        self.GetServerInfo = channel.unary_unary(
+                '/user.v1.UserService/GetServerInfo',
+                request_serializer=user__pb2.ServerInfoRequest.SerializeToString,
+                response_deserializer=user__pb2.ServerInfo.FromString,
+                _registered_method=True)
 
 
 class UserServiceServicer:
@@ -106,6 +116,19 @@ class UserServiceServicer:
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def Login(self, request, context):
+        """Module 5 : authentification JWT et instance qui a répondu (load balancing)
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetServerInfo(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_UserServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -138,6 +161,16 @@ def add_UserServiceServicer_to_server(servicer, server):
                     servicer.SendChatMessage,
                     request_deserializer=user__pb2.ChatMessage.FromString,
                     response_serializer=user__pb2.SendChatMessageResponse.SerializeToString,
+            ),
+            'Login': grpc.unary_unary_rpc_method_handler(
+                    servicer.Login,
+                    request_deserializer=user__pb2.LoginRequest.FromString,
+                    response_serializer=user__pb2.LoginResponse.SerializeToString,
+            ),
+            'GetServerInfo': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetServerInfo,
+                    request_deserializer=user__pb2.ServerInfoRequest.FromString,
+                    response_serializer=user__pb2.ServerInfo.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -302,6 +335,60 @@ class UserService:
             '/user.v1.UserService/SendChatMessage',
             user__pb2.ChatMessage.SerializeToString,
             user__pb2.SendChatMessageResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def Login(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/user.v1.UserService/Login',
+            user__pb2.LoginRequest.SerializeToString,
+            user__pb2.LoginResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetServerInfo(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/user.v1.UserService/GetServerInfo',
+            user__pb2.ServerInfoRequest.SerializeToString,
+            user__pb2.ServerInfo.FromString,
             options,
             channel_credentials,
             insecure,

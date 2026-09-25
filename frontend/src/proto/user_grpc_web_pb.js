@@ -309,5 +309,127 @@ proto.user.v1.UserServicePromiseClient.prototype.sendChatMessage =
 };
 
 
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.user.v1.LoginRequest,
+ *   !proto.user.v1.LoginResponse>}
+ */
+const methodDescriptor_UserService_Login = new grpc.web.MethodDescriptor(
+  '/user.v1.UserService/Login',
+  grpc.web.MethodType.UNARY,
+  proto.user.v1.LoginRequest,
+  proto.user.v1.LoginResponse,
+  /**
+   * @param {!proto.user.v1.LoginRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.user.v1.LoginResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.user.v1.LoginRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.user.v1.LoginResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.user.v1.LoginResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.user.v1.UserServiceClient.prototype.login =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/user.v1.UserService/Login',
+      request,
+      metadata || {},
+      methodDescriptor_UserService_Login,
+      callback);
+};
+
+
+/**
+ * @param {!proto.user.v1.LoginRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.user.v1.LoginResponse>}
+ *     Promise that resolves to the response
+ */
+proto.user.v1.UserServicePromiseClient.prototype.login =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/user.v1.UserService/Login',
+      request,
+      metadata || {},
+      methodDescriptor_UserService_Login);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.user.v1.ServerInfoRequest,
+ *   !proto.user.v1.ServerInfo>}
+ */
+const methodDescriptor_UserService_GetServerInfo = new grpc.web.MethodDescriptor(
+  '/user.v1.UserService/GetServerInfo',
+  grpc.web.MethodType.UNARY,
+  proto.user.v1.ServerInfoRequest,
+  proto.user.v1.ServerInfo,
+  /**
+   * @param {!proto.user.v1.ServerInfoRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.user.v1.ServerInfo.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.user.v1.ServerInfoRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.user.v1.ServerInfo)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.user.v1.ServerInfo>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.user.v1.UserServiceClient.prototype.getServerInfo =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/user.v1.UserService/GetServerInfo',
+      request,
+      metadata || {},
+      methodDescriptor_UserService_GetServerInfo,
+      callback);
+};
+
+
+/**
+ * @param {!proto.user.v1.ServerInfoRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.user.v1.ServerInfo>}
+ *     Promise that resolves to the response
+ */
+proto.user.v1.UserServicePromiseClient.prototype.getServerInfo =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/user.v1.UserService/GetServerInfo',
+      request,
+      metadata || {},
+      methodDescriptor_UserService_GetServerInfo);
+};
+
+
 module.exports = proto.user.v1;
 

@@ -68,3 +68,31 @@ class SendChatMessageResponse(_message.Message):
     SUBSCRIBER_COUNT_FIELD_NUMBER: _ClassVar[int]
     subscriber_count: int
     def __init__(self, subscriber_count: _Optional[int] = ...) -> None: ...
+
+class LoginRequest(_message.Message):
+    __slots__ = ("username", "password")
+    USERNAME_FIELD_NUMBER: _ClassVar[int]
+    PASSWORD_FIELD_NUMBER: _ClassVar[int]
+    username: str
+    password: str
+    def __init__(self, username: _Optional[str] = ..., password: _Optional[str] = ...) -> None: ...
+
+class LoginResponse(_message.Message):
+    __slots__ = ("token", "expires_at_ms")
+    TOKEN_FIELD_NUMBER: _ClassVar[int]
+    EXPIRES_AT_MS_FIELD_NUMBER: _ClassVar[int]
+    token: str
+    expires_at_ms: int
+    def __init__(self, token: _Optional[str] = ..., expires_at_ms: _Optional[int] = ...) -> None: ...
+
+class ServerInfoRequest(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
+class ServerInfo(_message.Message):
+    __slots__ = ("hostname", "tls_enabled")
+    HOSTNAME_FIELD_NUMBER: _ClassVar[int]
+    TLS_ENABLED_FIELD_NUMBER: _ClassVar[int]
+    hostname: str
+    tls_enabled: bool
+    def __init__(self, hostname: _Optional[str] = ..., tls_enabled: _Optional[bool] = ...) -> None: ...
