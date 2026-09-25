@@ -1,0 +1,79 @@
+admin:
+  address:
+    socket_address: { address: 0.0.0.0, port_value: 9901 }
+
+static_resources:
+  listeners:
+    - name: listener_0
+      address:
+        socket_address: { address: 0.0.0.0, port_value: 8080 }
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: ingress_http
+                route_config:
+                  name: local_route
+                  virtual_hosts:
+                    - name: local_service
+                      domains: ["*"]
+                      cors:
+                        allow_origin_string_match:
+                          - safe_regex:
+                              google_re2: {}
+                              regex: "https?://localhost(:[0-9]+)?"
+                        allow_methods: "GET, POST, OPTIONS"
+                        allow_headers: "content-type,x-grpc-web,grpc-timeout,x-user-agent,client-id,authorization,x-chat-room"
+                        expose_headers: "grpc-status,grpc-message"
+                      routes:
+                        # Le hub de chat est en mémoire dans chaque réplique : toutes les
+                        # requêtes d'un même salon (header x-chat-room) vont sur la même instance.
+                        - match: { path: "/user.v1.UserService/SubscribeChat" }
+                          route:
+                            cluster: grpc_backend
+                            timeout: 0s
+                            idle_timeout: 0s
+                            hash_policy: [{ header: { header_name: x-chat-room } }]
+                        - match: { path: "/user.v1.UserService/SendChatMessage" }
+                          route:
+                            cluster: grpc_backend
+                            timeout: 0s
+                            hash_policy: [{ header: { header_name: x-chat-room } }]
+                        # Tout le reste : sans hash, RING_HASH choisit une réplique au hasard
+                        - match: { prefix: "/" }
+                          route: { cluster: grpc_backend, timeout: 0s }
+                http_filters:
+                  - name: envoy.filters.http.cors
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.cors.v3.Cors
+                  - name: envoy.filters.http.grpc_web
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.grpc_web.v3.GrpcWeb
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+  clusters:
+    - name: grpc_backend
+      connect_timeout: 0.25s
+      # STRICT_DNS résout "backend" vers toutes les répliques Docker
+      type: STRICT_DNS
+      lb_policy: RING_HASH
+      # Health check gRPC actif : une réplique NOT_SERVING sort de la rotation
+      health_checks:
+        - timeout: 1s
+          interval: 5s
+          unhealthy_threshold: 2
+          healthy_threshold: 1
+          grpc_health_check: { service_name: user.v1.UserService }
+      typed_extension_protocol_options:
+        envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+          "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+          explicit_http_config:
+            http2_protocol_options: {}
+      load_assignment:
+        cluster_name: grpc_backend
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address: { socket_address: { address: backend, port_value: 50051 } }
