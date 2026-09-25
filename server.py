@@ -1,6 +1,8 @@
 import grpc
 from concurrent import futures
+import logging
 
+from grpc_health.v1 import health, health_pb2, health_pb2_grpc
 from generated import user_pb2, user_pb2_grpc
 
 FAKE_DB = {
@@ -19,6 +21,12 @@ FAKE_DB = {
         address=user_pb2.Address(street="King Street", city="London"),
     ),
 }
+
+
+class LoggingInterceptor(grpc.ServerInterceptor):
+    def intercept_service(self, continuation, handler_call_details):
+        logging.info("gRPC %s metadata=%s", handler_call_details.method, handler_call_details.invocation_metadata)
+        return continuation(handler_call_details)
 
 
 class UserService(user_pb2_grpc.UserServiceServicer):
@@ -47,8 +55,16 @@ class UserService(user_pb2_grpc.UserServiceServicer):
 
 
 def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    server = grpc.server(
+        futures.ThreadPoolExecutor(max_workers=10),
+        interceptors=[LoggingInterceptor()],
+    )
     user_pb2_grpc.add_UserServiceServicer_to_server(UserService(), server)
+    health_service = health.HealthServicer()
+    health_pb2_grpc.add_HealthServicer_to_server(health_service, server)
+    health_service.set('', health_pb2.HealthCheckResponse.SERVING)
+    health_service.set('user.v1.UserService', health_pb2.HealthCheckResponse.SERVING)
     server.add_insecure_port("[::]:50051")
     server.start()
     print("✅ Serveur gRPC en écoute sur le port 50051")

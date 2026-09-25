@@ -5,6 +5,7 @@ description = "gRPC Python backend for the React gRPC-Web course project"
 requires-python = ">=3.13"
 dependencies = [
     "grpcio==1.84.0",
+    "grpcio-health-checking==1.84.0",
     "grpcio-tools==1.84.0",
 ]
 
