@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { buildMetadata, client, proto } from './grpcClient.js'
+import { buildMetadata, client, describeGrpcError, proto, StatusCode } from './grpcClient.js'
 
 export function useUserGrpc(userId = 1) {
   const [user, setUser] = useState(null)
@@ -15,7 +15,7 @@ export function useUserGrpc(userId = 1) {
 
     client.getUser(request, metadata, (err, response) => {
       if (err) {
-        setError(err.message)
+        setError(describeGrpcError(err))
       } else {
         setUser(response?.getUser?.())
       }
@@ -30,9 +30,8 @@ export function useUserGrpc(userId = 1) {
       setUsers([...received])
     })
     stream.on('error', (streamError) => {
-      // Code 1 = CANCELLED : le flux a été annulé par le démontage du composant
-      if (streamError.code !== 1) {
-        setError(streamError.message)
+      if (streamError.code !== StatusCode.CANCELLED) {
+        setError(describeGrpcError(streamError))
       }
       setStreaming(false)
     })
