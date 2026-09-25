@@ -29,6 +29,13 @@ static_resources:
                         allow_headers: "keep-alive,user-agent,cache-control,content-type,content-transfer-encoding,x-accept-content-transfer-encoding,x-accept-response-streaming,x-user-agent,x-grpc-web,grpc-timeout,client-id"
                         expose_headers: "grpc-status,grpc-message"
                       routes:
+                        # Flux de chat : peut rester silencieux longtemps, pas d'idle timeout
+                        - match:
+                            path: "/user.v1.UserService/SubscribeChat"
+                          route:
+                            cluster: grpc_backend
+                            timeout: 0s
+                            idle_timeout: 0s
                         - match:
                             prefix: "/"
                           route:
