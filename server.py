@@ -2,12 +2,18 @@ import grpc
 from concurrent import futures
 from collections import deque
 import logging
+import os
 import queue
+import signal
+import socket
 import threading
 import time
 
 from grpc_health.v1 import health, health_pb2, health_pb2_grpc
 from generated import user_pb2, user_pb2_grpc
+import auth
+
+INSTANCE_NAME = os.environ.get("INSTANCE_NAME", socket.gethostname())
 
 FAKE_DB = {
     1: user_pb2.User(
@@ -29,7 +35,12 @@ FAKE_DB = {
 
 class LoggingInterceptor(grpc.ServerInterceptor):
     def intercept_service(self, continuation, handler_call_details):
-        logging.info("gRPC %s metadata=%s", handler_call_details.method, handler_call_details.invocation_metadata)
+        # On ne logge jamais le token JWT
+        metadata = [
+            (key, "***" if key == "authorization" else value)
+            for key, value in handler_call_details.invocation_metadata or ()
+        ]
+        logging.info("gRPC %s metadata=%s", handler_call_details.method, metadata)
         return continuation(handler_call_details)
 
 
@@ -66,8 +77,9 @@ class ChatHub:
 
 
 class UserService(user_pb2_grpc.UserServiceServicer):
-    def __init__(self):
+    def __init__(self, tls_enabled=False):
         self.chat_hub = ChatHub()
+        self.tls_enabled = tls_enabled
 
     def GetUser(self, request, context):
         user = FAKE_DB.get(request.user_id)
@@ -99,32 +111,84 @@ class UserService(user_pb2_grpc.UserServiceServicer):
 
     def SendChatMessage(self, request, context):
         text = request.text.strip()
-        author = request.author.strip()
         if not text:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, "Message text is required")
         if len(text) > 500:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, "Message too long (max 500)")
-        if not author:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, "Message author is required")
-        message = user_pb2.ChatMessage(text=text, author=author, sent_at_ms=int(time.time() * 1000))
+        # L'auteur vient du JWT, jamais du message envoyé par le client
+        message = user_pb2.ChatMessage(
+            text=text,
+            author=auth.username_from_context(context),
+            sent_at_ms=int(time.time() * 1000),
+        )
         return user_pb2.SendChatMessageResponse(subscriber_count=self.chat_hub.publish(message))
 
+    def Login(self, request, context):
+        if not auth.check_credentials(request.username, request.password):
+            context.abort(grpc.StatusCode.UNAUTHENTICATED, "Invalid username or password")
+        token, expires_at_ms = auth.issue_token(request.username)
+        return user_pb2.LoginResponse(token=token, expires_at_ms=expires_at_ms)
 
-def serve():
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    def GetServerInfo(self, request, context):
+        return user_pb2.ServerInfo(hostname=INSTANCE_NAME, tls_enabled=self.tls_enabled)
+
+
+def load_server_credentials():
+    """TLS si TLS_CERT_FILE/TLS_KEY_FILE sont définis, mTLS si TLS_CLIENT_CA_FILE l'est aussi."""
+    cert_file = os.environ.get("TLS_CERT_FILE")
+    key_file = os.environ.get("TLS_KEY_FILE")
+    if not (cert_file and key_file):
+        return None
+    with open(cert_file, "rb") as f:
+        cert = f.read()
+    with open(key_file, "rb") as f:
+        key = f.read()
+    client_ca_file = os.environ.get("TLS_CLIENT_CA_FILE")
+    client_ca = None
+    if client_ca_file:
+        with open(client_ca_file, "rb") as f:
+            client_ca = f.read()
+    return grpc.ssl_server_credentials(
+        [(key, cert)],
+        root_certificates=client_ca,
+        require_client_auth=client_ca is not None,
+    )
+
+
+def build_server(address, credentials=None):
     server = grpc.server(
         # Chaque abonné au chat occupe un thread tant que son flux est ouvert
-        futures.ThreadPoolExecutor(max_workers=50),
-        interceptors=[LoggingInterceptor()],
+        futures.ThreadPoolExecutor(max_workers=int(os.environ.get("GRPC_MAX_WORKERS", "50"))),
+        interceptors=[LoggingInterceptor(), auth.JwtAuthInterceptor()],
     )
-    user_pb2_grpc.add_UserServiceServicer_to_server(UserService(), server)
+    user_pb2_grpc.add_UserServiceServicer_to_server(UserService(tls_enabled=credentials is not None), server)
     health_service = health.HealthServicer()
     health_pb2_grpc.add_HealthServicer_to_server(health_service, server)
     health_service.set('', health_pb2.HealthCheckResponse.SERVING)
     health_service.set('user.v1.UserService', health_pb2.HealthCheckResponse.SERVING)
-    server.add_insecure_port("[::]:50051")
+    if credentials is None:
+        port = server.add_insecure_port(address)
+    else:
+        port = server.add_secure_port(address, credentials)
+    return server, health_service, port
+
+
+def serve():
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    credentials = load_server_credentials()
+    port = os.environ.get("GRPC_PORT", "50051")
+    server, health_service, _ = build_server(f"[::]:{port}", credentials)
     server.start()
-    print("✅ Serveur gRPC en écoute sur le port 50051")
+    mode = "TLS" if credentials else "sans TLS"
+    print(f"✅ Serveur gRPC ({INSTANCE_NAME}) en écoute sur le port {port} ({mode})")
+
+    def shutdown(_signum, _frame):
+        # Arrêt propre : on sort du load balancer, puis on laisse finir les appels en cours
+        health_service.enter_graceful_shutdown()
+        server.stop(grace=5)
+
+    signal.signal(signal.SIGTERM, shutdown)
+    signal.signal(signal.SIGINT, shutdown)
     server.wait_for_termination()
 
 
