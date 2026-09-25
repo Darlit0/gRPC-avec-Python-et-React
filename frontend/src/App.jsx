@@ -1,5 +1,6 @@
 import { Activity, ArrowUpRight, Database, Radio, Server, Wifi } from 'lucide-react'
 import { useUserGrpc } from './useUserGrpc.js'
+import { ChatPanel } from './components/ChatPanel.jsx'
 import { Badge } from './components/ui/badge.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card.jsx'
 import { Separator } from './components/ui/separator.jsx'
@@ -61,6 +62,8 @@ function App() {
             </CardContent>
           </Card>
         </div>
+
+        <ChatPanel />
 
         <footer className="footer-line"><span><Server size={14} /> Python gRPC backend</span><span>Port 50051</span></footer>
       </div>
