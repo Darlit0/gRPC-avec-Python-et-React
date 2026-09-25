@@ -39,12 +39,45 @@ class UserServiceStub:
                 request_serializer=user__pb2.GetUserRequest.SerializeToString,
                 response_deserializer=user__pb2.GetUserResponse.FromString,
                 _registered_method=True)
+        self.ListUsers = channel.unary_stream(
+                '/user.v1.UserService/ListUsers',
+                request_serializer=user__pb2.ListUsersRequest.SerializeToString,
+                response_deserializer=user__pb2.User.FromString,
+                _registered_method=True)
+        self.CreateUsers = channel.stream_unary(
+                '/user.v1.UserService/CreateUsers',
+                request_serializer=user__pb2.User.SerializeToString,
+                response_deserializer=user__pb2.CreateUsersResponse.FromString,
+                _registered_method=True)
+        self.Chat = channel.stream_stream(
+                '/user.v1.UserService/Chat',
+                request_serializer=user__pb2.ChatMessage.SerializeToString,
+                response_deserializer=user__pb2.ChatMessage.FromString,
+                _registered_method=True)
 
 
 class UserServiceServicer:
     """Missing associated documentation comment in .proto file."""
 
     def GetUser(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListUsers(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CreateUsers(self, request_iterator, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Chat(self, request_iterator, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -57,6 +90,21 @@ def add_UserServiceServicer_to_server(servicer, server):
                     servicer.GetUser,
                     request_deserializer=user__pb2.GetUserRequest.FromString,
                     response_serializer=user__pb2.GetUserResponse.SerializeToString,
+            ),
+            'ListUsers': grpc.unary_stream_rpc_method_handler(
+                    servicer.ListUsers,
+                    request_deserializer=user__pb2.ListUsersRequest.FromString,
+                    response_serializer=user__pb2.User.SerializeToString,
+            ),
+            'CreateUsers': grpc.stream_unary_rpc_method_handler(
+                    servicer.CreateUsers,
+                    request_deserializer=user__pb2.User.FromString,
+                    response_serializer=user__pb2.CreateUsersResponse.SerializeToString,
+            ),
+            'Chat': grpc.stream_stream_rpc_method_handler(
+                    servicer.Chat,
+                    request_deserializer=user__pb2.ChatMessage.FromString,
+                    response_serializer=user__pb2.ChatMessage.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -86,6 +134,87 @@ class UserService:
             '/user.v1.UserService/GetUser',
             user__pb2.GetUserRequest.SerializeToString,
             user__pb2.GetUserResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListUsers(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/user.v1.UserService/ListUsers',
+            user__pb2.ListUsersRequest.SerializeToString,
+            user__pb2.User.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CreateUsers(request_iterator,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.stream_unary(
+            request_iterator,
+            target,
+            '/user.v1.UserService/CreateUsers',
+            user__pb2.User.SerializeToString,
+            user__pb2.CreateUsersResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def Chat(request_iterator,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.stream_stream(
+            request_iterator,
+            target,
+            '/user.v1.UserService/Chat',
+            user__pb2.ChatMessage.SerializeToString,
+            user__pb2.ChatMessage.FromString,
             options,
             channel_credentials,
             insecure,

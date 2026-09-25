@@ -5,6 +5,9 @@ message GetUserRequest {
   int32 user_id = 1;
 }
 
+message ListUsersRequest {
+}
+
 message Address {
   string street = 1;
   string city = 2;
@@ -22,6 +25,17 @@ message GetUserResponse {
   User user = 1;
 }
 
+message CreateUsersResponse {
+  int32 created_count = 1;
+}
+
+message ChatMessage {
+  string text = 1;
+}
+
 service UserService {
   rpc GetUser (GetUserRequest) returns (GetUserResponse);
+  rpc ListUsers (ListUsersRequest) returns (stream User);
+  rpc CreateUsers (stream User) returns (CreateUsersResponse);
+  rpc Chat (stream ChatMessage) returns (stream ChatMessage);
 }

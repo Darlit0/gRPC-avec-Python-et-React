@@ -28,6 +28,23 @@ class UserService(user_pb2_grpc.UserServiceServicer):
             context.abort(grpc.StatusCode.NOT_FOUND, f"User {request.user_id} not found")
         return user_pb2.GetUserResponse(user=user)
 
+    def ListUsers(self, request, context):
+        for user in FAKE_DB.values():
+            yield user
+
+    def CreateUsers(self, request_iterator, context):
+        created_count = 0
+        for user in request_iterator:
+            if not user.email:
+                context.abort(grpc.StatusCode.INVALID_ARGUMENT, "User email is required")
+            FAKE_DB[user.id] = user
+            created_count += 1
+        return user_pb2.CreateUsersResponse(created_count=created_count)
+
+    def Chat(self, request_iterator, context):
+        for message in request_iterator:
+            yield user_pb2.ChatMessage(text=f"echo: {message.text}")
+
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

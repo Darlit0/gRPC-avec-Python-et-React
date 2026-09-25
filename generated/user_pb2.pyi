@@ -11,6 +11,10 @@ class GetUserRequest(_message.Message):
     user_id: int
     def __init__(self, user_id: _Optional[int] = ...) -> None: ...
 
+class ListUsersRequest(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
 class Address(_message.Message):
     __slots__ = ("street", "city")
     STREET_FIELD_NUMBER: _ClassVar[int]
@@ -38,3 +42,15 @@ class GetUserResponse(_message.Message):
     USER_FIELD_NUMBER: _ClassVar[int]
     user: User
     def __init__(self, user: _Optional[_Union[User, _Mapping]] = ...) -> None: ...
+
+class CreateUsersResponse(_message.Message):
+    __slots__ = ("created_count",)
+    CREATED_COUNT_FIELD_NUMBER: _ClassVar[int]
+    created_count: int
+    def __init__(self, created_count: _Optional[int] = ...) -> None: ...
+
+class ChatMessage(_message.Message):
+    __slots__ = ("text",)
+    TEXT_FIELD_NUMBER: _ClassVar[int]
+    text: str
+    def __init__(self, text: _Optional[str] = ...) -> None: ...
